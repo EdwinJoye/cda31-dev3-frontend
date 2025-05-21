@@ -1,5 +1,5 @@
 import type { User } from "../models/User";
-import { notifyError } from "../utils/notifications";
+import { notifyError, notifySuccess } from "../utils/notifications";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -257,15 +257,19 @@ export const updateUserService = async (id: number, user: Partial<User>) => {
 
 export const deleteUserService = async (id: number) => {
   try {
-    const response = await fetch(`${API_URL}/collaborator/${id}`, {
+    const response = await fetch(`${API_URL}/collaborator/delete/${id}`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || `Failed to delete user with ID ${id}`);
     }
+
+    notifySuccess({
+      title: "Collaborateur supprimé",
+      message: `Le collaborateur avec l'ID ${id} a bien été supprimé.`,
+    });
 
     return true;
   } catch (error) {

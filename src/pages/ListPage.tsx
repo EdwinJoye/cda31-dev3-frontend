@@ -6,6 +6,7 @@ import {
   Pagination,
   Group,
   Button,
+  Stack,
 } from "@mantine/core";
 import { UserCard } from "../components/UserCard";
 import useUsersStore from "../stores/useUsersStore";
@@ -29,24 +30,30 @@ const ListPage = () => {
   );
 
   return (
-    <Container size="xl" py="xl">
-      <Group className="justify-between">
-        <Title mb="lg">Liste des utilisateurs</Title>
-        <Button
-          onClick={() => navigate(`/admin/user/create`)}
-          leftSection={<IconUserPlus size={20} />}
-        >
-          Ajouter un utilisateur
-        </Button>
-      </Group>
+    <Container
+      size="xl"
+      py="xl"
+      className="h-full flex flex-col justify-between"
+    >
+      <Stack>
+        <Group className="justify-between">
+          <Title mb="lg">Liste des utilisateurs</Title>
+          <Button
+            onClick={() => navigate(`/admin/user/create`)}
+            leftSection={<IconUserPlus size={20} />}
+          >
+            Ajouter un utilisateur
+          </Button>
+        </Group>
 
-      <Grid gutter="lg">
-        {displayedUsers.map((user) => (
-          <Grid.Col key={user.id} span={{ base: 12, md: 4, lg: 3 }}>
-            <UserCard user={user} />
-          </Grid.Col>
-        ))}
-      </Grid>
+        <Grid gutter="lg">
+          {displayedUsers.map((user) => (
+            <Grid.Col key={user.id} span={{ base: 12, md: 4, lg: 3 }}>
+              <UserCard user={user} />
+            </Grid.Col>
+          ))}
+        </Grid>
+      </Stack>
 
       <Group mt="xl" justify="center">
         <Pagination

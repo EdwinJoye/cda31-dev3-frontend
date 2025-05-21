@@ -13,6 +13,6 @@ export interface User {
   city: string | null;
   country: string | null;
   photo: string | null;
-  category: Category | null;
+  category: Category;
   isAdmin: boolean;
 }

@@ -216,6 +216,7 @@ const useUsersStore = create<UserState>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const success = await deleteUserService(id);
+
       if (success) {
         const currentUsers = get().users;
         const updatedUsers = currentUsers.filter((c) => c.id !== id);
@@ -227,6 +228,7 @@ const useUsersStore = create<UserState>((set, get) => ({
 
         set({ users: updatedUsers });
       }
+
       set({ loading: false });
       return success;
     } catch (error) {

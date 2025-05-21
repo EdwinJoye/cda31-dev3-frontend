@@ -146,10 +146,46 @@ const UserFormPage = () => {
   return (
     <Container size="sm" py="xl" style={{ position: "relative" }}>
       <LoadingOverlay visible={loading} />
-      <Title order={2} mb="md" className="justify-center">
+      <Title order={2} mb="md" className="text-center">
         {userId ? "Modifier l'utilisateur" : "Créer un nouvel utilisateur"}
       </Title>
 
+      <Stack className="flex-1 items-center !h-full">
+        <Box className="relative">
+          <Avatar
+            src={
+              form.values.photo
+                ? URL.createObjectURL(form.values.photo)
+                : initialPhoto || ""
+            }
+            size={180}
+            style={{ cursor: "pointer" }}
+            onClick={() => fileInputRef.current?.click()}
+          />
+          <ActionIcon
+            variant="transparent"
+            size="xl"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              opacity: 0,
+              transition: "opacity 0.2s",
+            }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <IconPhotoPlus color="white" size={32} />
+          </ActionIcon>
+        </Box>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handlePhotoChange}
+        />
+      </Stack>
       <Box
         component="form"
         onSubmit={form.onSubmit(handleSubmit)}
@@ -229,75 +265,32 @@ const UserFormPage = () => {
             />
           </Group>
         </Group>
-        <Group className="justify-between">
-          <Stack className="items-center gap-3 mt-4 flex-1 bg-pink-200">
-            <Text>Date d'anniversaire</Text>
-            <DatePicker
-              value={form.values.birthdate}
-              onChange={(date) => {
-                const parsedDate =
-                  typeof date === "string" ? new Date(date) : date;
-                form.setFieldValue("birthdate", parsedDate);
-              }}
-            />
-          </Stack>
-          <Stack className="flex-1 bg-amber-200 items-center !h-full">
-            <Text>Date d'anniversaire</Text>
-            <Box className="relative bg-green-200">
-              <Avatar
-                src={
-                  form.values.photo
-                    ? URL.createObjectURL(form.values.photo)
-                    : initialPhoto || ""
-                }
-                size={120}
-                style={{ cursor: "pointer" }}
-                onClick={() => fileInputRef.current?.click()}
-              />
-              <ActionIcon
-                variant="transparent"
-                size="xl"
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  opacity: 0,
-                  transition: "opacity 0.2s",
-                }}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <IconPhotoPlus color="white" size={32} />
-              </ActionIcon>
-            </Box>
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              style={{ display: "none" }}
-              onChange={handlePhotoChange}
-            />
-          </Stack>
-        </Group>
-
-        <Group style={{ justifyContent: "flex-end" }} mt="md">
-          <Button
-            type="submit"
-            leftSection={<IconCheck size={18} />}
-            color="green"
-            radius="md"
-          >
-            {userId ? "Enregistrer" : "Créer"}
-          </Button>
-
+        <Stack className="items-center gap-3 flex-1">
+          <Text>Date d'anniversaire</Text>
+          <DatePicker
+            value={form.values.birthdate}
+            onChange={(date) => {
+              const parsedDate =
+                typeof date === "string" ? new Date(date) : date;
+              form.setFieldValue("birthdate", parsedDate);
+            }}
+          />
+        </Stack>
+        <Group mt="md" className="justify-center">
           <Button
             type="button"
             leftSection={<IconX size={18} />}
             color="gray"
-            radius="md"
             onClick={() => navigate("/admin/users")}
           >
             Annuler
+          </Button>
+          <Button
+            type="submit"
+            leftSection={<IconCheck size={18} />}
+            color="green"
+          >
+            {userId ? "Enregistrer" : "Créer"}
           </Button>
         </Group>
       </Box>
