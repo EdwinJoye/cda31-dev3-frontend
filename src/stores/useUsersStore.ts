@@ -1,227 +1,243 @@
 import { create } from "zustand";
 import type { User } from "../models/User";
 import {
-  fetchAllCollaborators,
-  fetchCollaboratorById,
-  fetchCollaboratorByEmail,
-  fetchRandomCollaborator,
-  fetchCollaboratorsByCategory,
-  fetchCollaboratorsByName,
-  filterCollaboratorsByText,
-  createCollaborator,
-  updateCollaborator,
-  deleteCollaborator,
-} from "../services/collaboratorService";
+  fetchAllUsersService,
+  fetchUserByIdService,
+  fetchUserByEmailService,
+  fetchRandomUserService,
+  fetchUsersByCategoryService,
+  fetchUsersByNameService,
+  filterUsersByTextService,
+  createUserService,
+  updateUserService,
+  deleteUserService,
+} from "../services/userService";
 
-interface CollaboratorState {
-  collaborators: User[];
-  selectedCollaborator: User | null;
+interface UserState {
+  users: User[];
+  selectedUser: User | null;
   loading: boolean;
   error: string | null;
 
   // Setters
-  setCollaborators: (collaborators: User[]) => void;
-  setSelectedCollaborator: (collaborator: User | null) => void;
+  setUsers: (users: User[]) => void;
+  setSelectedUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
   // API Methods
-  fetchAllCollaborators: () => Promise<void>;
-  fetchCollaboratorById: (id: number) => Promise<void>;
-  fetchCollaboratorByEmail: (email: string) => Promise<void>;
-  fetchRandomCollaborator: () => Promise<void>;
-  fetchCollaboratorsByCategory: (category: string) => Promise<void>;
-  fetchCollaboratorsByName: (name: string) => Promise<void>;
-  filterCollaboratorsByText: (text: string) => Promise<void>;
-  createCollaborator: (collaborator: Partial<User>) => Promise<void>;
-  updateCollaborator: (
-    id: number,
-    collaborator: Partial<User>
-  ) => Promise<void>;
-  deleteCollaborator: (id: number) => Promise<void>;
+  fetchAllUsers: () => Promise<User[]>;
+  fetchUserById: (id: number) => Promise<User | null>;
+  fetchUserByEmail: (email: string) => Promise<User | null>;
+  fetchRandomUser: () => Promise<User | null>;
+  fetchUsersByCategory: (category: string) => Promise<User[]>;
+  fetchUsersByName: (name: string) => Promise<User[]>;
+  filterUsersByText: (text: string) => Promise<User[]>;
+  createUser: (user: Partial<User>) => Promise<boolean>;
+  updateUser: (id: number, user: Partial<User>) => Promise<boolean>;
+  deleteUser: (id: number) => Promise<boolean>;
 }
 
-const useCollaboratorsStore = create<CollaboratorState>((set, get) => ({
-  collaborators: [],
-  selectedCollaborator: null,
+const useUsersStore = create<UserState>((set, get) => ({
+  users: [],
+  selectedUser: null,
   loading: false,
   error: null,
 
   // Setters
-  setCollaborators: (collaborators) => set({ collaborators }),
-  setSelectedCollaborator: (collaborator) =>
-    set({ selectedCollaborator: collaborator }),
+  setUsers: (users) => set({ users }),
+  setSelectedUser: (user) => set({ selectedUser: user }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
 
   // API Methods
-  fetchAllCollaborators: async () => {
+  fetchAllUsers: async () => {
     try {
       set({ loading: true, error: null });
-      const collaborators = await fetchAllCollaborators();
-      set({ collaborators, loading: false });
+      const users = await fetchAllUsersService();
+      set({ users, loading: false });
+      return users;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return [];
     }
   },
 
-  fetchCollaboratorById: async (id: number) => {
+  fetchUserById: async (id: number) => {
     try {
       set({ loading: true, error: null });
-      const collaborator = await fetchCollaboratorById(id);
-      set({ selectedCollaborator: collaborator, loading: false });
+      const user = await fetchUserByIdService(id);
+      set({ selectedUser: user, loading: false });
+      return user;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return null;
     }
   },
 
-  fetchCollaboratorByEmail: async (email: string) => {
+  fetchUserByEmail: async (email: string) => {
     try {
       set({ loading: true, error: null });
-      const collaborator = await fetchCollaboratorByEmail(email);
-      set({ selectedCollaborator: collaborator, loading: false });
+      const user = await fetchUserByEmailService(email);
+      set({ selectedUser: user, loading: false });
+      return user;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return null;
     }
   },
 
-  fetchRandomCollaborator: async () => {
+  fetchRandomUser: async () => {
     try {
       set({ loading: true, error: null });
-      const collaborator = await fetchRandomCollaborator();
-      set({ selectedCollaborator: collaborator, loading: false });
+      const user = await fetchRandomUserService();
+      set({ selectedUser: user, loading: false });
+      return user;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return null;
     }
   },
 
-  fetchCollaboratorsByCategory: async (category: string) => {
+  fetchUsersByCategory: async (category: string) => {
     try {
       set({ loading: true, error: null });
-      const collaborators = await fetchCollaboratorsByCategory(category);
-      set({ collaborators, loading: false });
+      const users = await fetchUsersByCategoryService(category);
+      set({ users, loading: false });
+      return users;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return [];
     }
   },
 
-  fetchCollaboratorsByName: async (name: string) => {
+  fetchUsersByName: async (name: string) => {
     try {
       set({ loading: true, error: null });
-      const collaborators = await fetchCollaboratorsByName(name);
-      set({ collaborators, loading: false });
+      const users = await fetchUsersByNameService(name);
+      set({ users, loading: false });
+      return users;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return [];
     }
   },
 
-  filterCollaboratorsByText: async (text: string) => {
+  filterUsersByText: async (text: string) => {
     try {
       set({ loading: true, error: null });
-      const collaborators = await filterCollaboratorsByText(text);
-      set({ collaborators, loading: false });
+      const users = await filterUsersByTextService(text);
+      set({ users, loading: false });
+      return users;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return [];
     }
   },
 
-  createCollaborator: async (collaborator: Partial<User>) => {
+  createUser: async (user: Partial<User>) => {
     try {
       set({ loading: true, error: null });
-      const success = await createCollaborator(collaborator);
+      const success = await createUserService(user);
       if (success) {
-        await get().fetchAllCollaborators();
+        await get().fetchAllUsers();
       }
       set({ loading: false });
+      return success;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return false;
     }
   },
 
-  updateCollaborator: async (id: number, collaborator: Partial<User>) => {
+  updateUser: async (id: number, user: Partial<User>) => {
     try {
       set({ loading: true, error: null });
-      const success = await updateCollaborator(id, collaborator);
+      const success = await updateUserService(id, user);
       if (success) {
-        const currentCollaborators = get().collaborators;
-        const updatedCollaborators = currentCollaborators.map((c) =>
-          c.id === id ? { ...c, ...collaborator } : c
+        const currentUsers = get().users;
+        const updatedUsers = currentUsers.map((c) =>
+          c.id === id ? { ...c, ...user } : c
         );
-        set({ collaborators: updatedCollaborators, loading: false });
+        set({ users: updatedUsers });
 
-        const selectedCollaborator = get().selectedCollaborator;
-        if (selectedCollaborator && selectedCollaborator.id === id) {
+        const selectedUser = get().selectedUser;
+        if (selectedUser && selectedUser.id === id) {
           set({
-            selectedCollaborator: { ...selectedCollaborator, ...collaborator },
+            selectedUser: { ...selectedUser, ...user },
           });
         }
       }
+      set({ loading: false });
+      return success;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return false;
     }
   },
 
-  deleteCollaborator: async (id: number) => {
+  deleteUser: async (id: number) => {
     try {
       set({ loading: true, error: null });
-      const success = await deleteCollaborator(id);
+      const success = await deleteUserService(id);
       if (success) {
-        const currentCollaborators = get().collaborators;
-        const updatedCollaborators = currentCollaborators.filter(
-          (c) => c.id !== id
-        );
+        const currentUsers = get().users;
+        const updatedUsers = currentUsers.filter((c) => c.id !== id);
 
-        const selectedCollaborator = get().selectedCollaborator;
-        if (selectedCollaborator && selectedCollaborator.id === id) {
-          set({ selectedCollaborator: null });
+        const selectedUser = get().selectedUser;
+        if (selectedUser && selectedUser.id === id) {
+          set({ selectedUser: null });
         }
 
-        set({ collaborators: updatedCollaborators, loading: false });
+        set({ users: updatedUsers });
       }
+      set({ loading: false });
+      return success;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
+      return false;
     }
   },
 }));
 
-export default useCollaboratorsStore;
+export default useUsersStore;

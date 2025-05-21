@@ -42,9 +42,13 @@ const UserPage = () => {
 
   useEffect(() => {
     if (userId) {
+      console.log("Fetching user with ID:", userId);
       setLoading(true);
-      fetchUserById(userId)
-        .then((data) => setUser(data))
+      fetchUserById(Number(userId))
+        .then((data) => {
+          console.log("User data:", data);
+          if (data) setUser(data);
+        })
         .finally(() => setLoading(false));
     }
   }, [userId, fetchUserById]);
@@ -125,14 +129,15 @@ const UserPage = () => {
       <Divider mb="xl" />
 
       <Stack>
-        <Group align="center">
-          <IconCake size={20} />
-          <Text size="md">
-            {dayjs(user.birthdate).format("DD MMMM YYYY")} (
-            {getAge(user.birthdate)} ans)
-          </Text>
-        </Group>
-
+        {user.birthdate ? (
+          <Group align="center">
+            <IconCake size={20} />
+            <Text size="md">
+              {dayjs(user.birthdate).format("DD MMMM YYYY")} (
+              {getAge(user.birthdate)} ans)
+            </Text>
+          </Group>
+        ) : null}
         <Group align="center">
           <IconMail size={20} />
           <Text size="md">{user.email}</Text>

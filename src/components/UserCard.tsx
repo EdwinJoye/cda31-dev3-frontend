@@ -15,7 +15,6 @@ import type { User } from "../models/User";
 
 interface UserCardProps {
   user: User;
-  handleClick: () => void;
 }
 
 dayjs.extend(relativeTime);

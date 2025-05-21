@@ -3,7 +3,7 @@ import { notifyError } from "../utils/notifications";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const fetchAllCollaborators = async () => {
+export const fetchAllUsersService = async () => {
   try {
     const response = await fetch(`${API_URL}/all/collaborators`, {
       method: "GET",
@@ -11,10 +11,9 @@ export const fetchAllCollaborators = async () => {
     });
 
     if (!response.ok) {
-      console.log(`REQUETE : ${API_URL}/all/collaborators`);
       const errorData = await response.text();
       console.error("Error response:", errorData);
-      throw new Error(errorData || "Failed to fetch collaborators");
+      throw new Error(errorData || "Failed to fetch users");
     }
 
     const contentType = response.headers.get("content-type");
@@ -31,7 +30,7 @@ export const fetchAllCollaborators = async () => {
     if (data.allCollaborators) {
       return data.allCollaborators;
     } else {
-      throw new Error("Invalid data format: allCollaborators not found");
+      throw new Error("Invalid data format: allUsers not found");
     }
   } catch (error) {
     console.error("Error fetching collaborators:", error);
@@ -43,7 +42,7 @@ export const fetchAllCollaborators = async () => {
   }
 };
 
-export const fetchCollaboratorById = async (id: number) => {
+export const fetchUserByIdService = async (id: number) => {
   try {
     const formData = new FormData();
     formData.append("id", id.toString());
@@ -55,15 +54,13 @@ export const fetchCollaboratorById = async (id: number) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to fetch collaborator with ID ${id}`
-      );
+      throw new Error(errorData.error || `Failed to fetch user with ID ${id}`);
     }
 
     const data = await response.json();
     return data.collaborator;
   } catch (error) {
-    console.error(`Error fetching collaborator with ID ${id}:`, error);
+    console.error(`Error fetching user with ID ${id}:`, error);
     notifyError({
       title: "Erreur",
       message: `Impossible de récupérer le collaborateur avec l'ID ${id}.`,
@@ -72,7 +69,7 @@ export const fetchCollaboratorById = async (id: number) => {
   }
 };
 
-export const fetchCollaboratorByEmail = async (email: string) => {
+export const fetchUserByEmailService = async (email: string) => {
   try {
     const formData = new FormData();
     formData.append("email", email);
@@ -85,14 +82,14 @@ export const fetchCollaboratorByEmail = async (email: string) => {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        errorData.error || `Failed to fetch collaborator with email ${email}`
+        errorData.error || `Failed to fetch user with email ${email}`
       );
     }
 
     const data = await response.json();
-    return data.collaborator;
+    return data.user;
   } catch (error) {
-    console.error(`Error fetching collaborator with email ${email}:`, error);
+    console.error(`Error fetching user with email ${email}:`, error);
     notifyError({
       title: "Erreur",
       message: `Impossible de récupérer le collaborateur avec l'email ${email}.`,
@@ -101,7 +98,7 @@ export const fetchCollaboratorByEmail = async (email: string) => {
   }
 };
 
-export const fetchRandomCollaborator = async () => {
+export const fetchRandomUserService = async () => {
   try {
     const response = await fetch(`${API_URL}/collaborator/random`, {
       method: "GET",
@@ -110,13 +107,13 @@ export const fetchRandomCollaborator = async () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch random collaborator");
+      throw new Error(errorData.error || "Failed to fetch random user");
     }
 
     const data = await response.json();
-    return data.collaborator;
+    return data.user;
   } catch (error) {
-    console.error("Error fetching random collaborator:", error);
+    console.error("Error fetching random user:", error);
     notifyError({
       title: "Erreur",
       message: "Impossible de récupérer un collaborateur aléatoire.",
@@ -125,7 +122,7 @@ export const fetchRandomCollaborator = async () => {
   }
 };
 
-export const fetchCollaboratorsByCategory = async (category: string) => {
+export const fetchUsersByCategoryService = async (category: string) => {
   try {
     const formData = new FormData();
     formData.append("category", category);
@@ -138,27 +135,23 @@ export const fetchCollaboratorsByCategory = async (category: string) => {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        errorData.error ||
-          `Failed to fetch collaborators in category ${category}`
+        errorData.error || `Failed to fetch user in category ${category}`
       );
     }
 
     const data = await response.json();
-    return data.collaborators;
+    return data.users;
   } catch (error) {
-    console.error(
-      `Error fetching collaborators in category ${category}:`,
-      error
-    );
+    console.error(`Error fetching user in category ${category}:`, error);
     notifyError({
       title: "Erreur",
-      message: `Impossible de récupérer les collaborateurs de la catégorie ${category}.`,
+      message: `Impossible de récupérer les utilisateurs de la catégorie ${category}.`,
     });
     return [];
   }
 };
 
-export const fetchCollaboratorsByName = async (name: string) => {
+export const fetchUsersByNameService = async (name: string) => {
   try {
     const formData = new FormData();
     formData.append("name", name);
@@ -171,14 +164,14 @@ export const fetchCollaboratorsByName = async (name: string) => {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        errorData.error || `Failed to fetch collaborators with name ${name}`
+        errorData.error || `Failed to fetch users with name ${name}`
       );
     }
 
     const data = await response.json();
-    return data.collaborators;
+    return data.users;
   } catch (error) {
-    console.error(`Error fetching collaborators with name ${name}:`, error);
+    console.error(`Error fetching users with name ${name}:`, error);
     notifyError({
       title: "Erreur",
       message: `Impossible de récupérer les collaborateurs avec le nom ${name}.`,
@@ -187,7 +180,7 @@ export const fetchCollaboratorsByName = async (name: string) => {
   }
 };
 
-export const filterCollaboratorsByText = async (text: string) => {
+export const filterUsersByTextService = async (text: string) => {
   try {
     const response = await fetch(`${API_URL}/collaborators/filter`, {
       method: "POST",
@@ -198,14 +191,14 @@ export const filterCollaboratorsByText = async (text: string) => {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        errorData.error || `Failed to filter collaborators with text ${text}`
+        errorData.error || `Failed to filter users with text ${text}`
       );
     }
 
     const data = await response.json();
-    return data.collaborators;
+    return data.users;
   } catch (error) {
-    console.error(`Error filtering collaborators with text ${text}:`, error);
+    console.error(`Error filtering users with text ${text}:`, error);
     notifyError({
       title: "Erreur",
       message: `Impossible de filtrer les collaborateurs avec le texte "${text}".`,
@@ -214,51 +207,46 @@ export const filterCollaboratorsByText = async (text: string) => {
   }
 };
 
-export const createCollaborator = async (collaborator: Partial<User>) => {
+export const createUserService = async (user: Partial<User>) => {
   try {
     const response = await fetch(`${API_URL}/collaborator`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(collaborator),
+      body: JSON.stringify(user),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to create collaborator");
+      throw new Error(errorData.error || "Failed to create user");
     }
 
     return true;
   } catch (error) {
-    console.error("Error creating collaborator:", error);
+    console.error("Error creating user:", error);
     notifyError({
       title: "Erreur",
-      message: "Impossible de créer le collaborateur.",
+      message: "Impossible de créer l'utilisateur.",
     });
     return false;
   }
 };
 
-export const updateCollaborator = async (
-  id: number,
-  collaborator: Partial<User>
-) => {
+export const updateUserService = async (id: number, user: Partial<User>) => {
   try {
     const response = await fetch(`${API_URL}/collaborator/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(collaborator),
+      body: JSON.stringify(user),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to update collaborator with ID ${id}`
-      );
+      throw new Error(errorData.error || `Failed to update user with ID ${id}`);
     }
 
     return true;
   } catch (error) {
-    console.error(`Error updating collaborator with ID ${id}:`, error);
+    console.error(`Error updating user with ID ${id}:`, error);
     notifyError({
       title: "Erreur",
       message: `Impossible de mettre à jour le collaborateur avec l'ID ${id}.`,
@@ -267,7 +255,7 @@ export const updateCollaborator = async (
   }
 };
 
-export const deleteCollaborator = async (id: number) => {
+export const deleteUserService = async (id: number) => {
   try {
     const response = await fetch(`${API_URL}/collaborator/${id}`, {
       method: "DELETE",
@@ -276,14 +264,12 @@ export const deleteCollaborator = async (id: number) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to delete collaborator with ID ${id}`
-      );
+      throw new Error(errorData.error || `Failed to delete user with ID ${id}`);
     }
 
     return true;
   } catch (error) {
-    console.error(`Error deleting collaborator with ID ${id}:`, error);
+    console.error(`Error deleting user with ID ${id}:`, error);
     notifyError({
       title: "Erreur",
       message: `Impossible de supprimer le collaborateur avec l'ID ${id}.`,

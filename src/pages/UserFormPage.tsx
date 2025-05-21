@@ -1,4 +1,6 @@
 import {
+  ActionIcon,
+  Avatar,
   Box,
   Button,
   Container,
@@ -64,18 +66,21 @@ const UserFormPage = () => {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email invalide"),
       password: (value) =>
         userId ? null : value.length < 6 ? "Minimum 6 caractères" : null,
-      phone: (value) => (value.length < 10 ? "Téléphone invalide" : null),
+      phone: (value) =>
+        value && value.length < 10 ? "Téléphone invalide" : null,
       birthdate: (value) =>
         value === null ? "Date de naissance requise" : null,
-      city: (value) => (value.length < 2 ? "Minimum 2 caractères" : null),
-      country: (value) => (value.length < 2 ? "Minimum 2 caractères" : null),
+      city: (value) =>
+        value && value.length < 2 ? "Minimum 2 caractères" : null,
+      country: (value) =>
+        value && value.length < 2 ? "Minimum 2 caractères" : null,
     },
   });
 
   useEffect(() => {
     if (userId) {
       setLoading(true);
-      fetchUserById(userId).then((user) => {
+      fetchUserById(Number(userId)).then((user) => {
         setLoading(false);
         if (user) {
           form.setValues({
@@ -84,12 +89,12 @@ const UserFormPage = () => {
             lastname: user.lastname,
             email: user.email,
             password: "",
-            phone: user.phone,
+            phone: user.phone || "",
             birthdate: user.birthdate ? new Date(user.birthdate) : null,
-            city: user.city,
-            country: user.country,
+            city: user.city || "",
+            country: user.country || "",
             photo: null,
-            category: user.category,
+            category: user.category || "Client",
             isAdmin: user.isAdmin,
           });
           setInitialPhoto(user.photo);
@@ -104,7 +109,7 @@ const UserFormPage = () => {
     setLoading(true);
 
     const newUser: User = {
-      id: userId || Math.random().toString(36).substr(2, 9),
+      id: userId ? Number(userId) : Math.floor(Math.random() * 1000000),
       gender: values.gender,
       firstname: values.firstname,
       lastname: values.lastname,
@@ -113,16 +118,16 @@ const UserFormPage = () => {
       phone: values.phone,
       birthdate: values.birthdate
         ? values.birthdate.toISOString().split("T")[0]
-        : "",
+        : null,
       city: values.city,
       country: values.country,
-      photo: initialPhoto || "",
+      photo: initialPhoto || null,
       category: values.category,
       isAdmin: values.isAdmin,
     };
 
     const updatedUsers: User[] = userId
-      ? users.map((u) => (u.id === userId ? newUser : u))
+      ? users.map((u) => (u.id === Number(userId) ? newUser : u))
       : [...users, newUser];
 
     setUsers(updatedUsers);
@@ -144,33 +149,6 @@ const UserFormPage = () => {
       <Title order={2} mb="md" className="justify-center">
         {userId ? "Modifier l'utilisateur" : "Créer un nouvel utilisateur"}
       </Title>
-
-      <Box mb="md" className="flex justify-center">
-        <div
-          className="relative group w-[120px] h-[120px] rounded-full overflow-hidden hover:opacity-80 cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <img
-            src={
-              form.values.photo
-                ? URL.createObjectURL(form.values.photo)
-                : initialPhoto || ""
-            }
-            alt="Photo utilisateur"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 flex justify-center items-center z-50">
-            <IconPhotoPlus color="white" size={32} />
-          </div>
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handlePhotoChange}
-        />
-      </Box>
 
       <Box
         component="form"
@@ -220,7 +198,6 @@ const UserFormPage = () => {
           label="Téléphone"
           placeholder="+33 6 12 34 56 78"
           {...form.getInputProps("phone")}
-          required
         />
 
         <Group grow>
@@ -228,13 +205,11 @@ const UserFormPage = () => {
             label="Ville"
             placeholder="Ville"
             {...form.getInputProps("city")}
-            required
           />
           <TextInput
             label="Pays"
             placeholder="Pays"
             {...form.getInputProps("country")}
-            required
           />
         </Group>
 
@@ -254,18 +229,56 @@ const UserFormPage = () => {
             />
           </Group>
         </Group>
-
-        <Stack className="items-center gap-3 mt-4">
-          <Text>Date d'anniversaire</Text>
-          <DatePicker
-            value={form.values.birthdate}
-            onChange={(date) => {
-              const parsedDate =
-                typeof date === "string" ? new Date(date) : date;
-              form.setFieldValue("birthdate", parsedDate);
-            }}
-          />
-        </Stack>
+        <Group className="justify-between">
+          <Stack className="items-center gap-3 mt-4 flex-1 bg-pink-200">
+            <Text>Date d'anniversaire</Text>
+            <DatePicker
+              value={form.values.birthdate}
+              onChange={(date) => {
+                const parsedDate =
+                  typeof date === "string" ? new Date(date) : date;
+                form.setFieldValue("birthdate", parsedDate);
+              }}
+            />
+          </Stack>
+          <Stack className="flex-1 bg-amber-200 items-center !h-full">
+            <Text>Date d'anniversaire</Text>
+            <Box className="relative bg-green-200">
+              <Avatar
+                src={
+                  form.values.photo
+                    ? URL.createObjectURL(form.values.photo)
+                    : initialPhoto || ""
+                }
+                size={120}
+                style={{ cursor: "pointer" }}
+                onClick={() => fileInputRef.current?.click()}
+              />
+              <ActionIcon
+                variant="transparent"
+                size="xl"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  opacity: 0,
+                  transition: "opacity 0.2s",
+                }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <IconPhotoPlus color="white" size={32} />
+              </ActionIcon>
+            </Box>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handlePhotoChange}
+            />
+          </Stack>
+        </Group>
 
         <Group style={{ justifyContent: "flex-end" }} mt="md">
           <Button

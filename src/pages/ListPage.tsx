@@ -1,31 +1,49 @@
 import { useState, useEffect } from "react";
-import { Grid, Container, Title, Pagination, Group } from "@mantine/core";
+import {
+  Grid,
+  Container,
+  Title,
+  Pagination,
+  Group,
+  Button,
+} from "@mantine/core";
 import { UserCard } from "../components/UserCard";
 import useUsersStore from "../stores/useUsersStore";
+import { IconUserPlus } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
 
 const ListPage = () => {
-  const { collaborators, fetchAllCollaborators } = useUsersStore();
+  const navigate = useNavigate();
+  const { users, fetchAllUsers } = useUsersStore();
   const [activePage, setActivePage] = useState(1);
   const itemsPerPage = 8;
 
   useEffect(() => {
-    fetchAllCollaborators();
-  }, [fetchAllCollaborators]);
+    fetchAllUsers();
+  }, [fetchAllUsers]);
 
-  const totalPages = Math.ceil(collaborators.length / itemsPerPage);
-  const displayedUsers = collaborators.slice(
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const displayedUsers = users.slice(
     (activePage - 1) * itemsPerPage,
     activePage * itemsPerPage
   );
 
   return (
     <Container size="xl" py="xl">
-      <Title mb="lg">Liste des utilisateurs</Title>
+      <Group className="justify-between">
+        <Title mb="lg">Liste des utilisateurs</Title>
+        <Button
+          onClick={() => navigate(`/admin/user/create`)}
+          leftSection={<IconUserPlus size={20} />}
+        >
+          Ajouter un utilisateur
+        </Button>
+      </Group>
 
       <Grid gutter="lg">
         {displayedUsers.map((user) => (
           <Grid.Col key={user.id} span={{ base: 12, md: 4, lg: 3 }}>
-            <UserCard user={collaborators} />
+            <UserCard user={user} />
           </Grid.Col>
         ))}
       </Grid>
