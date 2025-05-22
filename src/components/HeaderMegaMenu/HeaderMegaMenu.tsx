@@ -1,24 +1,12 @@
 import {
-  IconBook,
-  IconChartPie3,
-  IconChevronDown,
-  IconCode,
-  IconCoin,
-  IconFingerprint,
-  IconNotification,
-} from "@tabler/icons-react";
-import {
   Anchor,
   Box,
   Burger,
   Button,
   Center,
-  Collapse,
   Divider,
-  Drawer,
   Group,
   HoverCard,
-  ScrollArea,
   SimpleGrid,
   Text,
   ThemeIcon,
@@ -26,20 +14,26 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-// import { MantineLogo } from "@mantinex/mantine-logo";
+import {
+  IconBook,
+  IconChartBar,
+  IconChartPie3,
+  IconChevronDown,
+  IconCode,
+  IconFingerprint,
+  IconNotification,
+} from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from "../../stores/useAuthStore";
+import Drawer from "../Drawer/Drawer";
 import classes from "./HeaderMegaMenu.module.css";
-import { useAuth } from "../../context/auth/useAuth";
 
 const mockdata = [
   {
     icon: IconCode,
     title: "Open source",
     description: "This Pokémon’s cry is very loud and distracting",
-  },
-  {
-    icon: IconCoin,
-    title: "Free for everyone",
-    description: "The fluid of Smeargle’s tail secretions changes",
   },
   {
     icon: IconBook,
@@ -61,17 +55,37 @@ const mockdata = [
     title: "Notifications",
     description: "Combusken battles with the intensely hot flames it spews",
   },
+  {
+    icon: IconChartBar,
+    title: "Statistics",
+    description: "View detailed statistics and data analysis",
+    link: "/admin/users/statistics",
+  },
 ];
 
 export function HeaderMegaMenu() {
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { logout } = useAuthStore();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
     useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
 
+  const handleLogout = () => {
+    logout();
+  };
+
   const links = mockdata.map((item) => (
-    <UnstyledButton className={classes.subLink} key={item.title}>
+    <UnstyledButton
+      className={classes.subLink}
+      key={item.title}
+      onClick={() => {
+        if (item.link) {
+          window.location.href = item.link;
+        }
+      }}
+    >
       <Group wrap="nowrap" align="flex-start">
         <ThemeIcon size={34} variant="default" radius="md">
           <item.icon size={22} color={theme.colors.blue[6]} />
@@ -92,10 +106,8 @@ export function HeaderMegaMenu() {
     <Box>
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
-          {/* <MantineLogo size={30} /> */}
-
           <Group h="100%" gap={0} visibleFrom="sm">
-            <a href="#" className={classes.link}>
+            <a href="/" className={classes.link}>
               Home
             </a>
             <HoverCard
@@ -148,15 +160,20 @@ export function HeaderMegaMenu() {
             <a href="/admin/users" className={classes.link}>
               Users
             </a>
-            <a href="#" className={classes.link}>
-              Academy
-            </a>
           </Group>
 
-          <Group visibleFrom="sm">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
-          </Group>
+          {isAuthenticated ? (
+            <Button variant="default" onClick={handleLogout}>
+              Log out
+            </Button>
+          ) : (
+            <Group justify="center" grow pb="xl" px="md">
+              <Button variant="default" onClick={() => navigate(`/login`)}>
+                Log in
+              </Button>
+              <Button>Sign up</Button>
+            </Group>
+          )}
 
           <Burger
             opened={drawerOpened}
@@ -165,50 +182,17 @@ export function HeaderMegaMenu() {
           />
         </Group>
       </header>
-
       <Drawer
-        opened={drawerOpened}
-        onClose={closeDrawer}
-        size="100%"
-        padding="md"
-        title="Navigation"
-        hiddenFrom="sm"
-        zIndex={1000000}
-      >
-        <ScrollArea h="calc(100vh - 80px" mx="-md">
-          <Divider my="sm" />
-
-          <a href="#" className={classes.link}>
-            Home
-          </a>
-          <UnstyledButton className={classes.link} onClick={toggleLinks}>
-            <Center inline>
-              <Box component="span" mr={5}>
-                Features
-              </Box>
-              <IconChevronDown size={16} color={theme.colors.blue[6]} />
-            </Center>
-          </UnstyledButton>
-          <Collapse in={linksOpened}>{links}</Collapse>
-          <a href="#" className={classes.link}>
-            Learn
-          </a>
-          <a href="#" className={classes.link}>
-            Academy
-          </a>
-
-          <Divider my="sm" />
-
-          {isAuthenticated ? (
-            <Group justify="center" grow pb="xl" px="md">
-              <Button variant="default">Log in</Button>
-              <Button>Sign up</Button>
-            </Group>
-          ) : (
-            <Button variant="default">Log out</Button>
-          )}
-        </ScrollArea>
-      </Drawer>
+        drawerOpened={drawerOpened}
+        closeDrawer={closeDrawer}
+        linksOpened={linksOpened}
+        toggleLinks={toggleLinks}
+        links={links}
+        isAuthenticated={isAuthenticated}
+        handleLogout={handleLogout}
+        navigate={navigate}
+        theme={theme}
+      />
     </Box>
   );
 }

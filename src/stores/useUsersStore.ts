@@ -3,11 +3,6 @@ import type { User } from "../models/User";
 import {
   fetchAllUsersService,
   fetchUserByIdService,
-  fetchUserByEmailService,
-  fetchRandomUserService,
-  fetchUsersByCategoryService,
-  fetchUsersByNameService,
-  filterUsersByTextService,
   createUserService,
   updateUserService,
   deleteUserService,
@@ -28,12 +23,7 @@ interface UserState {
   // API Methods
   fetchAllUsers: () => Promise<User[]>;
   fetchUserById: (id: number) => Promise<User | null>;
-  fetchUserByEmail: (email: string) => Promise<User | null>;
-  fetchRandomUser: () => Promise<User | null>;
-  fetchUsersByCategory: (category: string) => Promise<User[]>;
-  fetchUsersByName: (name: string) => Promise<User[]>;
-  filterUsersByText: (text: string) => Promise<User[]>;
-  createUser: (user: Partial<User>) => Promise<boolean>;
+  createUser: (user: Partial<User>) => Promise<User>;
   updateUser: (id: number, user: Partial<User>) => Promise<boolean>;
   deleteUser: (id: number) => Promise<boolean>;
 }
@@ -55,8 +45,10 @@ const useUsersStore = create<UserState>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const users = await fetchAllUsersService();
-      set({ users, loading: false });
-      return users;
+      users.sort((a: User, b: User) => a.id - b.id);
+      const reversedUsers = users.slice().reverse();
+      set({ users: reversedUsers, loading: false });
+      return reversedUsers;
     } catch (error) {
       set({
         error:
@@ -83,102 +75,26 @@ const useUsersStore = create<UserState>((set, get) => ({
     }
   },
 
-  fetchUserByEmail: async (email: string) => {
+  createUser: async (user) => {
     try {
       set({ loading: true, error: null });
-      const user = await fetchUserByEmailService(email);
-      set({ selectedUser: user, loading: false });
-      return user;
-    } catch (error) {
-      set({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-        loading: false,
-      });
-      return null;
-    }
-  },
 
-  fetchRandomUser: async () => {
-    try {
-      set({ loading: true, error: null });
-      const user = await fetchRandomUserService();
-      set({ selectedUser: user, loading: false });
-      return user;
-    } catch (error) {
-      set({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-        loading: false,
-      });
-      return null;
-    }
-  },
+      const { collaborateur } = await createUserService(user);
 
-  fetchUsersByCategory: async (category: string) => {
-    try {
-      set({ loading: true, error: null });
-      const users = await fetchUsersByCategoryService(category);
-      set({ users, loading: false });
-      return users;
-    } catch (error) {
-      set({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-        loading: false,
-      });
-      return [];
-    }
-  },
-
-  fetchUsersByName: async (name: string) => {
-    try {
-      set({ loading: true, error: null });
-      const users = await fetchUsersByNameService(name);
-      set({ users, loading: false });
-      return users;
-    } catch (error) {
-      set({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-        loading: false,
-      });
-      return [];
-    }
-  },
-
-  filterUsersByText: async (text: string) => {
-    try {
-      set({ loading: true, error: null });
-      const users = await filterUsersByTextService(text);
-      set({ users, loading: false });
-      return users;
-    } catch (error) {
-      set({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-        loading: false,
-      });
-      return [];
-    }
-  },
-
-  createUser: async (user: Partial<User>) => {
-    try {
-      set({ loading: true, error: null });
-      const success = await createUserService(user);
-      if (success) {
+      if (collaborateur) {
         await get().fetchAllUsers();
       }
+
       set({ loading: false });
-      return success;
+
+      return collaborateur;
     } catch (error) {
       set({
         error:
           error instanceof Error ? error.message : "An unknown error occurred",
         loading: false,
       });
-      return false;
+      throw error;
     }
   },
 

@@ -1,13 +1,18 @@
 import type { User } from "../models/User";
+import { getAuthHeaders } from "../utils/getAuthHeaders";
 import { notifyError, notifySuccess } from "../utils/notifications";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const fetchAllUsersService = async () => {
   try {
+    const headers = {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
     const response = await fetch(`${API_URL}/all/collaborators`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
     });
 
     if (!response.ok) {
@@ -44,12 +49,15 @@ export const fetchAllUsersService = async () => {
 
 export const fetchUserByIdService = async (id: number) => {
   try {
-    const formData = new FormData();
-    formData.append("id", id.toString());
+    const headers = {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
 
     const response = await fetch(`${API_URL}/collaborator/id`, {
       method: "POST",
-      body: formData,
+      headers: headers,
+      body: JSON.stringify({ id }),
     });
 
     if (!response.ok) {
@@ -69,149 +77,15 @@ export const fetchUserByIdService = async (id: number) => {
   }
 };
 
-export const fetchUserByEmailService = async (email: string) => {
-  try {
-    const formData = new FormData();
-    formData.append("email", email);
-
-    const response = await fetch(`${API_URL}/collaborator/email`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to fetch user with email ${email}`
-      );
-    }
-
-    const data = await response.json();
-    return data.user;
-  } catch (error) {
-    console.error(`Error fetching user with email ${email}:`, error);
-    notifyError({
-      title: "Erreur",
-      message: `Impossible de récupérer le collaborateur avec l'email ${email}.`,
-    });
-    return null;
-  }
-};
-
-export const fetchRandomUserService = async () => {
-  try {
-    const response = await fetch(`${API_URL}/collaborator/random`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch random user");
-    }
-
-    const data = await response.json();
-    return data.user;
-  } catch (error) {
-    console.error("Error fetching random user:", error);
-    notifyError({
-      title: "Erreur",
-      message: "Impossible de récupérer un collaborateur aléatoire.",
-    });
-    return null;
-  }
-};
-
-export const fetchUsersByCategoryService = async (category: string) => {
-  try {
-    const formData = new FormData();
-    formData.append("category", category);
-
-    const response = await fetch(`${API_URL}/collaborators/category`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to fetch user in category ${category}`
-      );
-    }
-
-    const data = await response.json();
-    return data.users;
-  } catch (error) {
-    console.error(`Error fetching user in category ${category}:`, error);
-    notifyError({
-      title: "Erreur",
-      message: `Impossible de récupérer les utilisateurs de la catégorie ${category}.`,
-    });
-    return [];
-  }
-};
-
-export const fetchUsersByNameService = async (name: string) => {
-  try {
-    const formData = new FormData();
-    formData.append("name", name);
-
-    const response = await fetch(`${API_URL}/collaborators/name`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to fetch users with name ${name}`
-      );
-    }
-
-    const data = await response.json();
-    return data.users;
-  } catch (error) {
-    console.error(`Error fetching users with name ${name}:`, error);
-    notifyError({
-      title: "Erreur",
-      message: `Impossible de récupérer les collaborateurs avec le nom ${name}.`,
-    });
-    return [];
-  }
-};
-
-export const filterUsersByTextService = async (text: string) => {
-  try {
-    const response = await fetch(`${API_URL}/collaborators/filter`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.error || `Failed to filter users with text ${text}`
-      );
-    }
-
-    const data = await response.json();
-    return data.users;
-  } catch (error) {
-    console.error(`Error filtering users with text ${text}:`, error);
-    notifyError({
-      title: "Erreur",
-      message: `Impossible de filtrer les collaborateurs avec le texte "${text}".`,
-    });
-    return [];
-  }
-};
-
 export const createUserService = async (user: Partial<User>) => {
   try {
-    const response = await fetch(`${API_URL}/collaborator`, {
+    const headers = {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
+    const response = await fetch(`${API_URL}/collaborator/create`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
       body: JSON.stringify(user),
     });
 
@@ -220,22 +94,33 @@ export const createUserService = async (user: Partial<User>) => {
       throw new Error(errorData.error || "Failed to create user");
     }
 
-    return true;
+    const createdUser = await response.json();
+
+    notifySuccess({
+      title: "Succès",
+      message: "Utilisateur créé avec succès.",
+    });
+
+    return createdUser;
   } catch (error) {
     console.error("Error creating user:", error);
     notifyError({
       title: "Erreur",
       message: "Impossible de créer l'utilisateur.",
     });
-    return false;
+    throw error;
   }
 };
 
 export const updateUserService = async (id: number, user: Partial<User>) => {
   try {
+    const headers = {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
     const response = await fetch(`${API_URL}/collaborator/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
       body: JSON.stringify(user),
     });
 
@@ -257,8 +142,13 @@ export const updateUserService = async (id: number, user: Partial<User>) => {
 
 export const deleteUserService = async (id: number) => {
   try {
+    const headers = {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
     const response = await fetch(`${API_URL}/collaborator/delete/${id}`, {
       method: "DELETE",
+      headers: headers,
     });
 
     if (!response.ok) {

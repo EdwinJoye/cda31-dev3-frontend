@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import useUsersStore from "../stores/useUsersStore";
+import { useConfirmDelete } from "../hooks/useConfirmDelete";
 
 import { useEffect, useState } from "react";
 import {
@@ -15,7 +16,6 @@ import {
   Center,
   Loader,
   Flex,
-  Modal,
 } from "@mantine/core";
 import {
   IconMail,
@@ -37,8 +37,12 @@ const UserPage = () => {
   const { fetchUserById, deleteUser } = useUsersStore();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [modalOpened, setModalOpened] = useState(false);
   const navigate = useNavigate();
+
+  const { confirmDelete } = useConfirmDelete({
+    onConfirm: () => user && deleteUser(user.id),
+    redirectAfterDelete: () => navigate("/admin/users"),
+  });
 
   useEffect(() => {
     if (userId) {
@@ -57,12 +61,9 @@ const UserPage = () => {
     navigate(`/admin/user/edit/${user?.id}`);
   };
 
-  const confirmDelete = () => {
-    if (user) {
-      deleteUser(user.id);
-      setModalOpened(false);
-      navigate("/admin/users");
-    }
+  const handleDelete = () => {
+    if (!user) return;
+    confirmDelete(user);
   };
 
   if (loading)
@@ -85,7 +86,7 @@ const UserPage = () => {
         variant="subtle"
         leftSection={<IconArrowLeft size={18} />}
         mb="md"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/admin/users")}
       >
         Retour
       </Button>
@@ -119,7 +120,7 @@ const UserPage = () => {
             leftSection={<IconTrash size={18} />}
             color="red"
             variant="outline"
-            onClick={() => setModalOpened(true)}
+            onClick={handleDelete}
           >
             Supprimer
           </Button>
@@ -148,23 +149,6 @@ const UserPage = () => {
           <Text size="md">{user.phone}</Text>
         </Group>
       </Stack>
-
-      <Modal
-        opened={modalOpened}
-        onClose={() => setModalOpened(false)}
-        title="Confirmer la suppression"
-        centered
-      >
-        <Text>Es-tu sûr de vouloir supprimer cet utilisateur ?</Text>
-        <Group mt="md" justify="flex-end">
-          <Button variant="default" onClick={() => setModalOpened(false)}>
-            Annuler
-          </Button>
-          <Button color="red" onClick={confirmDelete}>
-            Supprimer
-          </Button>
-        </Group>
-      </Modal>
     </Container>
   );
 };

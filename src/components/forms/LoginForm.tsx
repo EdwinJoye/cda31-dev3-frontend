@@ -11,6 +11,8 @@ import {
   Title,
 } from "@mantine/core";
 import { Controller, useForm } from "react-hook-form";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { useNavigate } from "react-router-dom";
 
 type FormValues = {
   email: string;
@@ -29,13 +31,16 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        alert(`Email: ${data.email}\nMot de passe: ${data.password}`);
-        resolve(true);
-      }, 1000);
-    });
+  const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await login(data);
+      navigate("/");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erreur de connexion");
+    }
   };
 
   return (

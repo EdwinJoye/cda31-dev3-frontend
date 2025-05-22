@@ -7,7 +7,6 @@ export interface User {
   firstname: string;
   lastname: string;
   email: string;
-  password: string;
   phone: string | null;
   birthdate: string | null;
   city: string | null;

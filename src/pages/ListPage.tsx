@@ -1,33 +1,79 @@
-import { useState, useEffect } from "react";
 import {
-  Grid,
-  Container,
-  Title,
-  Pagination,
-  Group,
   Button,
+  Center,
+  Container,
+  Grid,
+  Group,
+  Loader,
+  Pagination,
   Stack,
+  Title,
 } from "@mantine/core";
-import { UserCard } from "../components/UserCard";
-import useUsersStore from "../stores/useUsersStore";
 import { IconUserPlus } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserCard } from "../components/UserCard";
+import UserFilter from "../components/UserFIlter";
+import type { Category } from "../models/Category";
+import useUsersStore from "../stores/useUsersStore";
 
 const ListPage = () => {
   const navigate = useNavigate();
   const { users, fetchAllUsers } = useUsersStore();
   const [activePage, setActivePage] = useState(1);
+  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 8;
 
   useEffect(() => {
-    fetchAllUsers();
+    const loadUsers = async () => {
+      setIsLoading(true);
+      await fetchAllUsers();
+      setIsLoading(false);
+    };
+
+    loadUsers();
   }, [fetchAllUsers]);
 
-  const totalPages = Math.ceil(users.length / itemsPerPage);
-  const displayedUsers = users.slice(
+  useEffect(() => {
+    setFilteredUsers(users);
+  }, [users]);
+
+  const handleFilter = ({
+    name,
+    category,
+    text,
+  }: {
+    name: string;
+    category: Category | null;
+    text: string;
+  }) => {
+    const filtered = users.filter((user) => {
+      const fullName = `${user.firstname} ${user.lastname}`.toLowerCase();
+      const nameMatch = name ? fullName.includes(name.toLowerCase()) : true;
+      const categoryMatch = category ? user.category === category : true;
+      const textMatch = text
+        ? fullName.includes(text.toLowerCase()) ||
+          user.email.toLowerCase().includes(text.toLowerCase()) ||
+          user.city?.toLowerCase().includes(text.toLowerCase()) ||
+          user.country?.toLowerCase().includes(text.toLowerCase())
+        : true;
+
+      return nameMatch && categoryMatch && textMatch;
+    });
+    setFilteredUsers(filtered);
+    setActivePage(1);
+  };
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const displayedUsers = filteredUsers.slice(
     (activePage - 1) * itemsPerPage,
     activePage * itemsPerPage
   );
+
+  const uniqueUserNames = [
+    ...new Set(users.map((user) => `${user.firstname} ${user.lastname}`)),
+  ];
 
   return (
     <Container
@@ -35,27 +81,33 @@ const ListPage = () => {
       py="xl"
       className="h-full flex flex-col justify-between"
     >
-      <Stack>
-        <Group className="justify-between">
-          <Title mb="lg">Liste des utilisateurs</Title>
-          <Button
-            onClick={() => navigate(`/admin/user/create`)}
-            leftSection={<IconUserPlus size={20} />}
-          >
-            Ajouter un utilisateur
-          </Button>
-        </Group>
+      {isLoading ? (
+        <Center style={{ height: "100vh" }}>
+          <Loader size="xl" />
+        </Center>
+      ) : (
+        <Stack>
+          <Group className="justify-between">
+            <Title mb="lg">Liste des utilisateurs</Title>
+            <Button
+              onClick={() => navigate(`/admin/user/create`)}
+              leftSection={<IconUserPlus size={20} />}
+            >
+              Ajouter un utilisateur
+            </Button>
+          </Group>
+          <UserFilter onFilter={handleFilter} userNames={uniqueUserNames} />
+          <Grid gutter="lg">
+            {displayedUsers.map((user) => (
+              <Grid.Col key={user.id} span={{ base: 12, md: 4, lg: 3 }}>
+                <UserCard user={user} />
+              </Grid.Col>
+            ))}
+          </Grid>
+        </Stack>
+      )}
 
-        <Grid gutter="lg">
-          {displayedUsers.map((user) => (
-            <Grid.Col key={user.id} span={{ base: 12, md: 4, lg: 3 }}>
-              <UserCard user={user} />
-            </Grid.Col>
-          ))}
-        </Grid>
-      </Stack>
-
-      <Group mt="xl" justify="center">
+      <Group p="xl" justify="center">
         <Pagination
           total={totalPages}
           value={activePage}

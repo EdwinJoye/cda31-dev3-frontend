@@ -39,7 +39,8 @@ const categoryOptions = [
 const UserFormPage = () => {
   const { userId } = useParams<{ userId?: string }>();
   const navigate = useNavigate();
-  const { fetchUserById, users, setUsers } = useUsersStore();
+  const { fetchUserById, users, setUsers, createUser, updateUser } =
+    useUsersStore();
   const [loading, setLoading] = useState(false);
   const [initialPhoto, setInitialPhoto] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -103,9 +104,9 @@ const UserFormPage = () => {
         }
       });
     }
-  }, [userId, fetchUserById, form, navigate]);
+  }, [userId, fetchUserById, navigate]);
 
-  const handleSubmit = (values: typeof form.values) => {
+  const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
     const newUser: User = {
@@ -126,13 +127,26 @@ const UserFormPage = () => {
       isAdmin: values.isAdmin,
     };
 
-    const updatedUsers: User[] = userId
-      ? users.map((u) => (u.id === Number(userId) ? newUser : u))
-      : [...users, newUser];
-
-    setUsers(updatedUsers);
-    setLoading(false);
-    navigate("/admin/users");
+    try {
+      if (userId) {
+        const success = await updateUser(Number(userId), newUser);
+        if (!success) {
+          console.error("La mise à jour de l'utilisateur a échoué");
+        }
+      } else {
+        const createdUser = await createUser(newUser);
+        if (createdUser && typeof createdUser !== "boolean") {
+          setUsers([...users, createdUser]);
+        } else {
+          console.error("La création de l'utilisateur a échoué");
+        }
+      }
+      navigate(`/admin/users`);
+    } catch (error) {
+      console.error("Erreur lors de la soumission du formulaire :", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,8 +168,8 @@ const UserFormPage = () => {
         <Box className="relative">
           <Avatar
             src={
-              form.values.photo
-                ? URL.createObjectURL(form.values.photo)
+              form?.values?.photo
+                ? URL.createObjectURL(form?.values?.photo)
                 : initialPhoto || ""
             }
             size={180}
