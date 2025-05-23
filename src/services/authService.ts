@@ -74,11 +74,6 @@ export async function loginCheckService(
 
     const data: LoginCheckResponse = await response.json();
 
-    notifySuccess({
-      title: "Connexion réussie",
-      message: `Token reçu`,
-    });
-
     return data;
   } catch (err: unknown) {
     if (

@@ -28,11 +28,12 @@ import { useAuthStore } from "../stores/useAuthStore";
 
 interface UserCardProps {
   user: User;
+  className?: string;
 }
 
 dayjs.extend(relativeTime);
 
-export const UserCard = ({ user }: UserCardProps) => {
+export const UserCard = ({ user, className }: UserCardProps) => {
   const navigate = useNavigate();
   const { connectedUser } = useAuthStore();
   const { deleteUser } = useUsersStore();
@@ -61,7 +62,7 @@ export const UserCard = ({ user }: UserCardProps) => {
       padding="lg"
       radius="md"
       withBorder
-      className="max-w-[420px] !h-full cursor-pointer transition-all duration-200 hover:scale-101 hover:shadow-sm hover:brightness-96"
+      className={`${className} max-w-[420px] !h-full cursor-pointer transition-all duration-200 hover:scale-101 hover:shadow-sm hover:brightness-96`}
       onClick={() => navigate(`/admin/user/${user.id}`)}
     >
       <Group mb="md" className="justify-between">
@@ -114,7 +115,6 @@ export const UserCard = ({ user }: UserCardProps) => {
         {user.category}
       </Badge>
       <Divider my="sm" />
-
       <Stack>
         <Group>
           <IconMail size={16} />

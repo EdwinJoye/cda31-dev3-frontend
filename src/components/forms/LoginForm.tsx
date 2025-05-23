@@ -131,7 +131,7 @@ export function LoginForm() {
 
       <Center mt="xl">
         <Text size="sm" color="dimmed">
-          Pas encore de compte ?{" "}
+          Pas encore de compte ?
           <Anchor href="#" size="sm" style={{ cursor: "pointer" }}>
             Créez-en un ici
           </Anchor>

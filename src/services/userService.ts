@@ -77,6 +77,35 @@ export const fetchUserByIdService = async (id: number) => {
   }
 };
 
+export const fetchRandomUserService = async () => {
+  try {
+    const headers = {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
+
+    const response = await fetch(`${API_URL}/collaborator/random`, {
+      method: "GET",
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch random user");
+    }
+
+    const data = await response.json();
+    return data.collaborator;
+  } catch (error) {
+    console.error("Error fetching random user:", error);
+    notifyError({
+      title: "Erreur",
+      message: "Impossible de récupérer un collaborateur aléatoire.",
+    });
+    return null;
+  }
+};
+
 export const createUserService = async (user: Partial<User>) => {
   try {
     const headers = {
@@ -118,7 +147,7 @@ export const updateUserService = async (id: number, user: Partial<User>) => {
       ...getAuthHeaders(),
       "Content-Type": "application/json",
     };
-    const response = await fetch(`${API_URL}/collaborator/${id}`, {
+    const response = await fetch(`${API_URL}/collaborator/update/${id}`, {
       method: "PUT",
       headers: headers,
       body: JSON.stringify(user),
@@ -128,7 +157,10 @@ export const updateUserService = async (id: number, user: Partial<User>) => {
       const errorData = await response.json();
       throw new Error(errorData.error || `Failed to update user with ID ${id}`);
     }
-
+    notifySuccess({
+      title: "Utilisateur mis à jour",
+      message: `L'utilisateur a été mis à jour avec succès`,
+    });
     return true;
   } catch (error) {
     console.error(`Error updating user with ID ${id}:`, error);

@@ -77,7 +77,7 @@ export function HeaderMegaMenu() {
   const handleLogout = () => {
     logout();
   };
-  console.log("connectedUser", connectedUser);
+
   const links = mockdata.map((item) => (
     <UnstyledButton
       className={classes.subLink}

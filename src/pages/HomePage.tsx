@@ -1,42 +1,53 @@
-import { useState, useEffect } from "react";
 import {
-  Container,
-  Title,
-  Text,
+  Avatar,
+  Box,
   Button,
   Card,
+  Container,
+  Divider,
   Grid,
   Group,
   Stack,
-  Avatar,
-  Badge,
-  Divider,
-  Box,
+  Text,
+  Title,
+  Loader,
 } from "@mantine/core";
 import {
-  IconUsers,
-  IconChartBar,
+  IconArrowRight,
   IconBell,
   IconCalendar,
-  IconArrowRight,
+  IconChartBar,
+  IconMessageCircleSearch,
   IconSparkles,
-  IconHeart,
   IconTrendingUp,
+  IconUsers,
 } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { UserCard } from "../components/UserCard";
+import useUsersStore from "../stores/useUsersStore";
 
 const HomePage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { fetchRandomUser, selectedUser, loading } = useUsersStore();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    fetchRandomUser();
+  }, [fetchRandomUser]);
+
   const getGreeting = () => {
     const hour = currentTime.getHours();
     if (hour < 12) return "Bonjour";
     if (hour < 18) return "Bon après-midi";
     return "Bonsoir";
+  };
+
+  const handleGetNewRandomUser = () => {
+    fetchRandomUser();
   };
 
   const quickActions = [
@@ -94,7 +105,6 @@ const HomePage = () => {
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       }}
     >
-      {/* Background Pattern */}
       <Box
         className="absolute inset-0 opacity-10"
         style={{
@@ -103,7 +113,6 @@ const HomePage = () => {
       />
 
       <Container size="xl" className="relative z-10 py-8">
-        {/* Header Section */}
         <Box className="text-center mb-12">
           <Group justify="center" mb="md">
             <IconSparkles size={32} className="text-white" />
@@ -123,16 +132,26 @@ const HomePage = () => {
             Bienvenue dans votre espace intranet collaboratif où chaque talent
             trouve sa place et où l'excellence de nos équipes prend vie.
           </Text>
-          <Badge
+
+          <Group justify="center" mb="lg" className="h-[300px]">
+            {selectedUser && !loading && (
+              <UserCard user={selectedUser} className="w-[500px]" />
+            )}
+            {loading && <Loader color="blue" size="lg" />}
+          </Group>
+
+          <Button
             size="lg"
             variant="white"
-            leftSection={<IconHeart size={16} />}
+            radius={100}
+            leftSection={<IconMessageCircleSearch size={16} />}
+            onClick={handleGetNewRandomUser}
+            loading={loading}
           >
-            L'humain au cœur de tout
-          </Badge>
+            Dites bonjour à quelqu'un
+          </Button>
         </Box>
 
-        {/* Quick Actions Grid */}
         <Grid gutter="lg" mb="xl">
           {quickActions.map((action, index) => (
             <Grid.Col key={index} span={{ base: 12, sm: 6, lg: 3 }}>
@@ -190,9 +209,7 @@ const HomePage = () => {
           ))}
         </Grid>
 
-        {/* Bottom Section */}
         <Grid gutter="lg">
-          {/* Recent Activity */}
           <Grid.Col span={{ base: 12, md: 7 }}>
             <Card
               shadow="xl"
@@ -215,7 +232,7 @@ const HomePage = () => {
                         <Text size="sm" className="text-gray-800">
                           <span style={{ fontWeight: 600 }}>
                             {activity.name}
-                          </span>{" "}
+                          </span>
                           {activity.action}
                         </Text>
                         <Text size="xs" className="text-gray-500">
@@ -230,7 +247,6 @@ const HomePage = () => {
             </Card>
           </Grid.Col>
 
-          {/* Welcome Card */}
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Card
               shadow="xl"
@@ -264,7 +280,6 @@ const HomePage = () => {
           </Grid.Col>
         </Grid>
 
-        {/* Time Display */}
         <Box className="text-center mt-12">
           <Text className="text-white/70 text-lg">
             {currentTime.toLocaleDateString("fr-FR", {
@@ -272,8 +287,8 @@ const HomePage = () => {
               year: "numeric",
               month: "long",
               day: "numeric",
-            })}{" "}
-            •{" "}
+            })}
+            •
             {currentTime.toLocaleTimeString("fr-FR", {
               hour: "2-digit",
               minute: "2-digit",

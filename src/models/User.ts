@@ -14,5 +14,4 @@ export interface User {
   country: string | null;
   photo: string | null;
   category: Category;
-  isAdmin: boolean;
 }

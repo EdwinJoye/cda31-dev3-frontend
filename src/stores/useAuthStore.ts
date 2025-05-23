@@ -18,7 +18,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           const userData = await loginService(credentials);
           const tokenData = await loginCheckService(credentials);
-
           const now = Date.now();
 
           set({

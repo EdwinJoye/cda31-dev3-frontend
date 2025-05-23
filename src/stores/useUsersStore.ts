@@ -1,16 +1,19 @@
 import { create } from "zustand";
 import type { User } from "../models/User";
 import {
-  fetchAllUsersService,
-  fetchUserByIdService,
   createUserService,
-  updateUserService,
   deleteUserService,
+  fetchAllUsersService,
+  fetchRandomUserService,
+  fetchUserByIdService,
+  updateUserService,
 } from "../services/userService";
+import { useAuthStore } from "./useAuthStore";
 
 interface UserState {
   users: User[];
   selectedUser: User | null;
+  lastRandomUser: User | null;
   loading: boolean;
   error: string | null;
 
@@ -21,6 +24,7 @@ interface UserState {
 
   fetchAllUsers: () => Promise<User[]>;
   fetchUserById: (id: number) => Promise<User | null>;
+  fetchRandomUser: () => Promise<User | null>;
   createUser: (user: Partial<User>) => Promise<User>;
   updateUser: (id: number, user: Partial<User>) => Promise<boolean>;
   deleteUser: (id: number) => Promise<boolean>;
@@ -29,6 +33,7 @@ interface UserState {
 const useUsersStore = create<UserState>((set, get) => ({
   users: [],
   selectedUser: null,
+  lastRandomUser: null,
   loading: false,
   error: null,
 
@@ -61,6 +66,57 @@ const useUsersStore = create<UserState>((set, get) => ({
       const user = await fetchUserByIdService(id);
       set({ selectedUser: user, loading: false });
       return user;
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+        loading: false,
+      });
+      return null;
+    }
+  },
+
+  fetchRandomUser: async () => {
+    const MAX_ATTEMPTS = 10;
+    let attempts = 0;
+
+    try {
+      set({ loading: true, error: null });
+
+      const connectedUser = useAuthStore.getState().connectedUser;
+      const lastRandomUser = get().lastRandomUser;
+      let randomUser: User | null = null;
+
+      while (attempts < MAX_ATTEMPTS) {
+        randomUser = await fetchRandomUserService();
+
+        if (!randomUser) {
+          break;
+        }
+
+        const isConnectedUser =
+          connectedUser && randomUser.id === connectedUser.id;
+        const isSameAsLast =
+          lastRandomUser && randomUser.id === lastRandomUser.id;
+
+        if (!isConnectedUser && !isSameAsLast) {
+          break;
+        }
+
+        attempts++;
+      }
+
+      if (randomUser) {
+        set({
+          selectedUser: randomUser,
+          lastRandomUser: randomUser,
+          loading: false,
+        });
+      } else {
+        set({ loading: false });
+      }
+
+      return randomUser;
     } catch (error) {
       set({
         error:

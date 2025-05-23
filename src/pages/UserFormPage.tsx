@@ -58,7 +58,7 @@ const UserFormPage = () => {
       country: "",
       photo: null as File | null,
       category: "Client" as Category,
-      isAdmin: false,
+      admin: false,
     },
 
     validate: {
@@ -96,7 +96,7 @@ const UserFormPage = () => {
             country: user.country || "",
             photo: null,
             category: user.category || "Client",
-            isAdmin: user.isAdmin,
+            admin: user.admin,
           });
           setInitialPhoto(user.photo);
         } else {
@@ -115,7 +115,7 @@ const UserFormPage = () => {
       firstname: values.firstname,
       lastname: values.lastname,
       email: values.email,
-      password: values.password,
+      // password: values.password,
       phone: values.phone,
       birthdate: values.birthdate
         ? values.birthdate.toISOString().split("T")[0]
@@ -124,7 +124,7 @@ const UserFormPage = () => {
       country: values.country,
       photo: initialPhoto || null,
       category: values.category,
-      isAdmin: values.isAdmin,
+      admin: values.admin,
     };
 
     try {
