@@ -3,6 +3,7 @@ import type { Gender } from "./Gender";
 
 export interface User {
   id: number;
+  admin: boolean;
   gender: Gender;
   firstname: string;
   lastname: string;

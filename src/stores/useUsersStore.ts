@@ -14,13 +14,11 @@ interface UserState {
   loading: boolean;
   error: string | null;
 
-  // Setters
   setUsers: (users: User[]) => void;
   setSelectedUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
-  // API Methods
   fetchAllUsers: () => Promise<User[]>;
   fetchUserById: (id: number) => Promise<User | null>;
   createUser: (user: Partial<User>) => Promise<User>;
@@ -34,13 +32,11 @@ const useUsersStore = create<UserState>((set, get) => ({
   loading: false,
   error: null,
 
-  // Setters
   setUsers: (users) => set({ users }),
   setSelectedUser: (user) => set({ selectedUser: user }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
 
-  // API Methods
   fetchAllUsers: async () => {
     try {
       set({ loading: true, error: null });

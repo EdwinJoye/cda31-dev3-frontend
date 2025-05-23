@@ -5,6 +5,7 @@ import {
   Routes,
 } from "react-router-dom";
 import PrivateLayout from "./layouts/PrivateLayout";
+import AdminLayout from "./layouts/AdminLayout";
 import { MainLayout } from "./layouts/MainLayout";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
@@ -25,11 +26,15 @@ const AppRouter = () => (
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/user/:userId" element={<UserPage />} />
           <Route path="/admin/users" element={<ListPage />} />
+          <Route path="/admin/users/statistics" element={<StatisticsPage />} />
+          <Route path="/admin/user/:userId" element={<UserPage />} />
+        </Route>
+
+        {/* Routes nécessitant un accès administrateur */}
+        <Route element={<AdminLayout />}>
           <Route path="/admin/user/create" element={<UserFormPage />} />
           <Route path="/admin/user/edit/:userId" element={<UserFormPage />} />
-          <Route path="/admin/users/statistics" element={<StatisticsPage />} />
         </Route>
       </Route>
 

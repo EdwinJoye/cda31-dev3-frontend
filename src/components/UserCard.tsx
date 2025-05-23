@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import useUsersStore from "../stores/useUsersStore";
 import { useConfirmDelete } from "../hooks/useConfirmDelete";
 import type { User } from "../models/User";
+import { useAuthStore } from "../stores/useAuthStore";
 
 interface UserCardProps {
   user: User;
@@ -33,6 +34,7 @@ dayjs.extend(relativeTime);
 
 export const UserCard = ({ user }: UserCardProps) => {
   const navigate = useNavigate();
+  const { connectedUser } = useAuthStore();
   const { deleteUser } = useUsersStore();
 
   const { confirmDelete } = useConfirmDelete({
@@ -75,36 +77,38 @@ export const UserCard = ({ user }: UserCardProps) => {
           </div>
         </Group>
 
-        <Box className="h-full">
-          <Menu shadow="md" width={160} position="bottom-start">
-            <Menu.Target>
-              <ActionIcon
-                size={20}
-                variant="default"
-                className="border-0"
-                onClick={handleMenuClick}
-              >
-                <IconDotsVertical />
-              </ActionIcon>
-            </Menu.Target>
+        {connectedUser?.admin ? (
+          <Box className="h-full">
+            <Menu shadow="md" width={160} position="bottom-start">
+              <Menu.Target>
+                <ActionIcon
+                  size={20}
+                  variant="default"
+                  className="border-0"
+                  onClick={handleMenuClick}
+                >
+                  <IconDotsVertical />
+                </ActionIcon>
+              </Menu.Target>
 
-            <Menu.Dropdown>
-              <Menu.Item
-                leftSection={<IconEdit size={16} />}
-                onClick={handleEdit}
-              >
-                Éditer
-              </Menu.Item>
-              <Menu.Item
-                leftSection={<IconTrash size={16} />}
-                color="red"
-                onClick={handleDelete}
-              >
-                Supprimer
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Box>
+              <Menu.Dropdown>
+                <Menu.Item
+                  leftSection={<IconEdit size={16} />}
+                  onClick={handleEdit}
+                >
+                  Éditer
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconTrash size={16} />}
+                  color="red"
+                  onClick={handleDelete}
+                >
+                  Supprimer
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Box>
+        ) : null}
       </Group>
       <Badge variant="light" size="md" color="blue">
         {user.category}

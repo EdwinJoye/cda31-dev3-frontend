@@ -1,5 +1,6 @@
 import {
   Anchor,
+  Avatar,
   Box,
   Burger,
   Button,
@@ -65,6 +66,7 @@ const mockdata = [
 
 export function HeaderMegaMenu() {
   const navigate = useNavigate();
+  const { connectedUser } = useAuthStore();
   const { isAuthenticated } = useAuth();
   const { logout } = useAuthStore();
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
@@ -75,7 +77,7 @@ export function HeaderMegaMenu() {
   const handleLogout = () => {
     logout();
   };
-
+  console.log("connectedUser", connectedUser);
   const links = mockdata.map((item) => (
     <UnstyledButton
       className={classes.subLink}
@@ -163,9 +165,12 @@ export function HeaderMegaMenu() {
           </Group>
 
           {isAuthenticated ? (
-            <Button variant="default" onClick={handleLogout}>
-              Log out
-            </Button>
+            <Group justify="center">
+              <Avatar src={connectedUser?.photo} alt="User Photo" />
+              <Button variant="default" onClick={handleLogout}>
+                Log out
+              </Button>
+            </Group>
           ) : (
             <Group justify="center" grow pb="xl" px="md">
               <Button variant="default" onClick={() => navigate(`/login`)}>

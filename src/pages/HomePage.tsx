@@ -23,12 +23,10 @@ import {
   IconHeart,
   IconTrendingUp,
 } from "@tabler/icons-react";
-import { getAuthHeaders } from "../utils/getAuthHeaders";
 
 const HomePage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const headers = getAuthHeaders();
-  console.log("HEADERS", headers);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);

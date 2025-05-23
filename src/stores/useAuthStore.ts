@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { loginService } from "../services/authService";
+import { loginCheckService, loginService } from "../services/authService";
 import type { AuthState } from "../models/AuthState";
 import type { LoginCredentials } from "../models/LoginCredentials";
 
@@ -12,16 +12,25 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       timestamp: null,
       isAuthenticated: false,
+      connectedUser: null,
 
       login: async (credentials: LoginCredentials) => {
-        const data = await loginService(credentials);
-        const now = Date.now();
+        try {
+          const userData = await loginService(credentials);
+          const tokenData = await loginCheckService(credentials);
 
-        set({
-          token: data.token,
-          timestamp: now,
-          isAuthenticated: true,
-        });
+          const now = Date.now();
+
+          set({
+            token: tokenData.token,
+            timestamp: now,
+            isAuthenticated: true,
+            connectedUser: userData.user,
+          });
+        } catch (error) {
+          console.error("Erreur lors de la connexion :", error);
+          throw error;
+        }
       },
 
       logout: () => {
@@ -29,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
           token: null,
           timestamp: null,
           isAuthenticated: false,
+          connectedUser: null,
         });
       },
 
@@ -44,6 +54,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             timestamp: null,
             isAuthenticated: false,
+            connectedUser: null,
           });
           return false;
         }
@@ -57,6 +68,7 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         timestamp: state.timestamp,
         isAuthenticated: state.isAuthenticated,
+        connectedUser: state.connectedUser,
       }),
     }
   )

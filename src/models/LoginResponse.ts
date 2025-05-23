@@ -1,8 +1,5 @@
-export type LoginResponse = {
-  token: string;
-  user: {
-    id: number;
-    email: string;
-    name: string;
-  };
-};
+import type { User } from "./User";
+
+export interface LoginResponse {
+  user: User;
+}

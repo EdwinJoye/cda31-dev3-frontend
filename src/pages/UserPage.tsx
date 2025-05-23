@@ -27,12 +27,14 @@ import {
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import type { User } from "../models/User";
+import { useAuthStore } from "../stores/useAuthStore";
 
 function getAge(birthdate: string) {
   return dayjs().diff(dayjs(birthdate), "year");
 }
 
 const UserPage = () => {
+  const { connectedUser } = useAuthStore();
   const { userId } = useParams<{ userId: string }>();
   const { fetchUserById, deleteUser } = useUsersStore();
   const [user, setUser] = useState<User | null>(null);
@@ -50,7 +52,6 @@ const UserPage = () => {
       setLoading(true);
       fetchUserById(Number(userId))
         .then((data) => {
-          console.log("User data:", data);
           if (data) setUser(data);
         })
         .finally(() => setLoading(false));
@@ -107,24 +108,26 @@ const UserPage = () => {
           </div>
         </Group>
 
-        <Group>
-          <Button
-            leftSection={<IconEdit size={18} />}
-            color="blue"
-            variant="outline"
-            onClick={handleEdit}
-          >
-            Éditer
-          </Button>
-          <Button
-            leftSection={<IconTrash size={18} />}
-            color="red"
-            variant="outline"
-            onClick={handleDelete}
-          >
-            Supprimer
-          </Button>
-        </Group>
+        {connectedUser?.admin ? (
+          <Group>
+            <Button
+              leftSection={<IconEdit size={18} />}
+              color="blue"
+              variant="outline"
+              onClick={handleEdit}
+            >
+              Éditer
+            </Button>
+            <Button
+              leftSection={<IconTrash size={18} />}
+              color="red"
+              variant="outline"
+              onClick={handleDelete}
+            >
+              Supprimer
+            </Button>
+          </Group>
+        ) : null}
       </Flex>
 
       <Divider mb="xl" />

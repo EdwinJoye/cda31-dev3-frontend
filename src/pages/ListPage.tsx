@@ -16,9 +16,11 @@ import { UserCard } from "../components/UserCard";
 import UserFilter from "../components/UserFIlter";
 import type { Category } from "../models/Category";
 import useUsersStore from "../stores/useUsersStore";
+import { useAuthStore } from "../stores/useAuthStore";
 
 const ListPage = () => {
   const navigate = useNavigate();
+  const { connectedUser } = useAuthStore();
   const { users, fetchAllUsers } = useUsersStore();
   const [activePage, setActivePage] = useState(1);
   const [filteredUsers, setFilteredUsers] = useState(users);
@@ -89,12 +91,14 @@ const ListPage = () => {
         <Stack>
           <Group className="justify-between">
             <Title mb="lg">Liste des utilisateurs</Title>
-            <Button
-              onClick={() => navigate(`/admin/user/create`)}
-              leftSection={<IconUserPlus size={20} />}
-            >
-              Ajouter un utilisateur
-            </Button>
+            {connectedUser?.admin ? (
+              <Button
+                onClick={() => navigate(`/admin/user/create`)}
+                leftSection={<IconUserPlus size={20} />}
+              >
+                Ajouter un utilisateur
+              </Button>
+            ) : null}
           </Group>
           <UserFilter onFilter={handleFilter} userNames={uniqueUserNames} />
           <Grid gutter="lg">
